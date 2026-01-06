@@ -7,6 +7,7 @@ Generates high-quality PBR textures for a mesh based on an input image and optio
 
 import os
 import sys
+import time
 
 # Apply torchvision compatibility fix before importing other modules
 import torchvision_fix
@@ -43,6 +44,9 @@ def main():
     print(f"  Max views: {args.max_views}")
     print(f"  Resolution: {args.resolution}")
     print(f"  Output: {output_mesh_path}")
+
+    start_time = time.time()
+    print(f"  Start time: {start_time}")
     
     # Import and configure the pipeline
     from textureGenPipeline import Hunyuan3DPaintPipeline, Hunyuan3DPaintConfig
@@ -175,6 +179,8 @@ def main():
     
     print(f"\n✅ Texture generation complete!")
     print(f"   Output: {output_mesh_path}")
+    time_taken = time.time() - start_time
+    print(f"   Time taken: {time_taken:.2f} seconds")
 
 
 if __name__ == "__main__":
