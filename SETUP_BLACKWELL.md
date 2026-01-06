@@ -164,6 +164,25 @@ onnxruntime is compiled against NumPy 1.x and crashes with NumPy 2.x:
 pip install 'numpy<2' --force-reinstall
 ```
 
+### Step 12: Install Blender 4.5
+
+Blender is required for GLB export:
+
+```bash
+BLENDER_VERSION="4.5.0"
+cd /tmp
+wget https://download.blender.org/release/Blender4.5/blender-${BLENDER_VERSION}-linux-x64.tar.xz
+sudo tar xf blender-${BLENDER_VERSION}-linux-x64.tar.xz -C /opt/
+rm blender-${BLENDER_VERSION}-linux-x64.tar.xz
+sudo ln -sf /opt/blender-${BLENDER_VERSION}-linux-x64/blender /usr/local/bin/blender
+```
+
+Verify:
+```bash
+blender --version
+# Expected: Blender 4.5.0
+```
+
 ## Verification
 
 ```bash
@@ -183,7 +202,7 @@ python -c "import custom_rasterizer_kernel; print('custom_rasterizer OK')"
 
 # Run texture generation test
 python run_texture_gen.py --mesh assets/1.glb --image assets/demo.png \
-    --prompt "high quality" --output ./outputs --no_glb
+    --prompt "high quality" --output ./outputs
 ```
 
 Expected verification output:
@@ -203,8 +222,7 @@ python run_texture_gen.py \
     --mesh assets/1.glb \
     --image assets/demo.png \
     --prompt "high quality 3d model with detailed textures" \
-    --output ./outputs \
-    --no_glb
+    --output ./outputs
 ```
 
 | Argument | Default | Description |
@@ -222,6 +240,7 @@ python run_texture_gen.py \
 | File | Description |
 |------|-------------|
 | `*_textured.obj` | Textured mesh in OBJ format |
+| `*_textured.glb` | Textured mesh in GLB format |
 | `*_textured.mtl` | Material file |
 | `*_textured.jpg` | Albedo/diffuse texture |
 | `*_textured_metallic.jpg` | Metallic PBR map |
@@ -280,9 +299,14 @@ pip install 'numpy<2' --force-reinstall
 
 ### Error: "No module named 'bpy'"
 
-**Cause**: Blender Python not installed.
+**Cause**: Blender not installed.
 
-**Solution**: Use `--no_glb` flag, or install Blender system-wide.
+**Solution**: Install Blender 4.5:
+```bash
+wget https://download.blender.org/release/Blender4.5/blender-4.5.0-linux-x64.tar.xz -P /tmp
+sudo tar xf /tmp/blender-4.5.0-linux-x64.tar.xz -C /opt/
+sudo ln -sf /opt/blender-4.5.0-linux-x64/blender /usr/local/bin/blender
+```
 
 ### Error: "gcc: No such file or directory"
 
@@ -304,6 +328,7 @@ ln -sf $CONDA_PREFIX/bin/x86_64-conda-linux-gnu-c++ $CONDA_PREFIX/bin/c++
 | CUDA Toolkit | 12.8.93 | Must match PyTorch CUDA |
 | GCC | 13.4.0 | Maximum supported by CUDA 12.8 |
 | NumPy | 1.26.4 | Must be < 2.0 |
+| Blender | 4.5.0 | For GLB export |
 | TORCH_CUDA_ARCH_LIST | 12.0 | Blackwell compute capability |
 
 ## File Structure
@@ -313,8 +338,6 @@ Hunyuan3D-2.1/
 ├── setup.sh                    # Automated setup script
 ├── SETUP_BLACKWELL.md          # This documentation
 ├── run_texture_gen.py          # Texture generation CLI
-├── patches/
-│   └── mesh_utils_patched.py   # Patched mesh_utils with lazy bpy
 ├── hy3dpaint/
 │   ├── ckpt/
 │   │   └── RealESRGAN_x4plus.pth
