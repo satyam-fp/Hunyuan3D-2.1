@@ -8,6 +8,7 @@ Generates high-quality PBR textures for a mesh based on an input image and optio
 import os
 import sys
 import time
+import torch
 
 # Apply torchvision compatibility fix before importing other modules
 import torchvision_fix
@@ -17,6 +18,20 @@ torchvision_fix.apply_fix()
 sys.path.insert(0, './hy3dshape')
 sys.path.insert(0, './hy3dpaint')
 import argparse
+
+def get_gpu_memory_stats():
+    """Get current GPU memory usage in GB."""
+    if torch.cuda.is_available():
+        allocated = torch.cuda.memory_allocated() / 1024**3
+        reserved = torch.cuda.memory_reserved() / 1024**3
+        max_allocated = torch.cuda.max_memory_allocated() / 1024**3
+        return allocated, reserved, max_allocated
+    return 0, 0, 0
+
+def print_gpu_memory(stage=""):
+    """Print current GPU memory usage."""
+    allocated, reserved, max_allocated = get_gpu_memory_stats()
+    print(f"  [GPU Memory{' - ' + stage if stage else ''}] Allocated: {allocated:.2f}GB, Reserved: {reserved:.2f}GB, Peak: {max_allocated:.2f}GB")
 
 def main():
     parser = argparse.ArgumentParser(description='Generate textures for 3D mesh')
@@ -57,6 +72,14 @@ def main():
     # Initialize pipeline
     print("\nInitializing Hunyuan3D Paint pipeline...")
     pipeline = Hunyuan3DPaintPipeline(config)
+
+    print("\nPipeline models:")
+    print([model_name for model_name in pipeline.models.keys()])
+    
+    # Reset GPU memory stats for tracking
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+    print_gpu_memory("After model load")
     
     # Override the hardcoded prompt in the pipeline
     # The pipeline uses image_caption = "high quality" internally
@@ -181,6 +204,13 @@ def main():
     print(f"   Output: {output_mesh_path}")
     time_taken = time.time() - start_time
     print(f"   Time taken: {time_taken:.2f} seconds")
+    
+    # Print final GPU memory stats
+    allocated, reserved, max_allocated = get_gpu_memory_stats()
+    print(f"\n📊 GPU Memory Summary:")
+    print(f"   Current allocated: {allocated:.2f} GB")
+    print(f"   Current reserved:  {reserved:.2f} GB")
+    print(f"   Peak allocated:    {max_allocated:.2f} GB")
 
 
 if __name__ == "__main__":
