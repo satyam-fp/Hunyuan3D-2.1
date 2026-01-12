@@ -52,8 +52,8 @@ psutil==6.0.0
 # GPU Computing (requires CUDA)
 cupy-cuda12x==13.4.1
 
-# Blender
-bpy==4.0
+# Blender (not pip-installable, needed only for GLB export - install Blender separately if needed)
+# bpy==4.0
 
 # ONNX Runtime
 onnxruntime==1.16.3
